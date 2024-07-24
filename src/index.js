@@ -1,5 +1,6 @@
 const http = require('http');
 const { URL } = require('url')
+const bodyParser = require('./helpers/bodyParser')
 
 const routes = require('./routes')
 
@@ -31,8 +32,11 @@ const server = http.createServer((request, response) => {
       response.writeHead(statusCode, { 'Content-Type': 'application/json' });
       response.end(JSON.stringify(body))
     }
-
-    route.handler(request, response)
+    if (request.method === 'POST' || request.method === 'PUT') {
+      bodyParser(request)
+    } else {
+      route.handler(request, response)
+    }
   } else {
     response.writeHead(404, { 'Content-Type': 'text/html' })
     response.end(`Cannot ${request.method} ${parsedUrl.pathname} `)
