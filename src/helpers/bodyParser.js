@@ -1,4 +1,4 @@
-function bodyParser(request) {
+function bodyParser(request, callback) {
   let body = ''
 
   request.on('data', (chunk) => { body += chunk });
@@ -6,11 +6,12 @@ function bodyParser(request) {
   request.on('end', () => {
     body = JSON.parse(body)
     request.body = body
+    callback()
   })
 
 }
 
-module.exports = bodyParser
+module.exports = bodyParser;
 
 
 

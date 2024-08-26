@@ -36,8 +36,8 @@ const server = http.createServer((request, response) => {
       response.writeHead(statusCode, { 'Content-Type': 'application/json' });
       response.end(JSON.stringify(body))
     }
-    if (request.method === 'POST' || request.method === 'PUT') {
-      bodyParser(request)
+    if (['POST', 'PUT', 'PATCH'].includes(request.method)) {
+      bodyParser(request, () => route.handler(request, response))
     } else {
       route.handler(request, response)
     }
