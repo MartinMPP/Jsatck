@@ -6,56 +6,51 @@ Delete
 */
 /*const U */
 
-const users = require('../mocks/users');
+const users = require('../mocks/users')
 
 module.exports = {
   listUsers(request, response) {
-    const { order } = request.query;
+    const { order } = request.query
 
     const sortedUsers = users.sort((a, b) => {
       if (order === 'desc') {
-        return b.id - a.id;
+        return a.id < b.id ? 1 : -1
       }
-      return a.id - b.id;
-    });
+      return a.id > b.id ? 1 : -1
+    })
 
-    response.status(200).send(sortedUsers);
+    response.send(200, sortedUsers);
   },
 
   getUserById(request, response) {
-    const { id } = request.params;
+    const { id } = request.params
 
-    const user = users.find((user) => user.id === parseInt(id, 10));
+    const user = users.find((user) => user.id === Number(id))
 
     if (!user) {
-      return response.status(404).send({ error: 'User not found' });
+      return response.send(400, { error: 'User not found' })
     }
-    response.status(200).send(user);
+    response.send(200, user)
   },
 
   createUser(request, response) {
-    let body = '';
+    let body = ''
 
     request.on('data', (chunk) => { body += chunk });
-    request.on('end', () => {
-      try {
-        body = JSON.parse(body);
-      } catch (error) {
-        return response.status(400).send({ error: 'Invalid JSON' });
-      }
 
-      if (!body.name) {
-        return response.status(400).send({ error: 'Name is required' });
-      }
+    request.on('end', () => {
+      body = JSON.parse(body);
 
       const lastUserId = users[users.length - 1].id;
       const newUser = {
         id: lastUserId + 1,
         name: body.name,
-      };
+      }
 
-      users.push(newUser);
-      response.status(201).send(newUser); // 201 Created
-    });
+      users.push(newUser)
+      console.log('qualquer coisa')
+      response.send(200, newUser)
+    })
+
   },
-};
+}
