@@ -4,48 +4,58 @@ Read
 Update
 Delete
 */
+/*const U */
 
-const users = require('../mocks/users')
+const users = require('../mocks/users');
 
 module.exports = {
   listUsers(request, response) {
-    const { order } = request.query
+    const { order } = request.query;
 
     const sortedUsers = users.sort((a, b) => {
       if (order === 'desc') {
-        return a.id < b.id ? 1 : -1
+        return b.id - a.id;
       }
-      return a.id > b.id ? 1 : -1
-    })
+      return a.id - b.id;
+    });
 
-    response.send(200, sortedUsers);
+    response.status(200).send(sortedUsers);
   },
 
   getUserById(request, response) {
-    const { id } = request.params
-    const user = users.find((user) => user.id === Number(id))
+    const { id } = request.params;
+
+    const user = users.find((user) => user.id === parseInt(id, 10));
+
     if (!user) {
-      return response.send(400, { error: 'User not found' })
+      return response.status(404).send({ error: 'User not found' });
     }
-    response.send(200, user)
+    response.status(200).send(user);
   },
 
   createUser(request, response) {
-    let body = ''
+    let body = '';
 
     request.on('data', (chunk) => { body += chunk });
-
     request.on('end', () => {
-      body = JSON.parse(body)
-      const lastUserId = users[users.length - 1].id
+      try {
+        body = JSON.parse(body);
+      } catch (error) {
+        return response.status(400).send({ error: 'Invalid JSON' });
+      }
+
+      if (!body.name) {
+        return response.status(400).send({ error: 'Name is required' });
+      }
+
+      const lastUserId = users[users.length - 1].id;
       const newUser = {
         id: lastUserId + 1,
-        name: body.name
-      }
-      users.push(newUser)
+        name: body.name,
+      };
 
-      response.send(200, newUser)
-    })
-
+      users.push(newUser);
+      response.status(201).send(newUser); // 201 Created
+    });
   },
-}
+};
